@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from db.database import Base
+from backend.db.database import Base
 
 class Flashcard(Base):
     __tablename__ = "flashcards"

@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
-from core.models import FakeAnswerLLMResponse
-from core.prompts import FAKE_ANSWER_PROMPT
+from backend.core.models import FakeAnswerLLMResponse
+from backend.core.prompts import FAKE_ANSWER_PROMPT
 import os
 from dotenv import load_dotenv
 
@@ -16,7 +16,7 @@ class FakeAnswerGenerator:
     @classmethod
     def _get_llm(cls):
         api_key = os.getenv("OPENAI_API_KEY")
-        return ChatOpenAI(model="gpt-4", api_key=api_key)
+        return ChatOpenAI(model="gpt-4o", api_key=api_key)
 
     @classmethod
     def generate_distractors(cls, question: str, correct_answer: str) -> list[str]:
@@ -28,7 +28,7 @@ class FakeAnswerGenerator:
             ("human", f"Question: {question}\nCorrect Answer: {correct_answer}")
         ]).partial(format_instructions=parser.get_format_instructions())
 
-        # FIXED: Proper invocation of prompt + LLM
+
         formatted_messages = prompt.format_prompt().to_messages()
         raw = llm.invoke(formatted_messages)
 

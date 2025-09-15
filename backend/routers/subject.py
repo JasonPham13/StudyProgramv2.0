@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from db.database import get_db
-from models.subject import Subject
-from schemas.subject import SubjectCreate, SubjectOut
+from backend.db.database import get_db
+from backend.models.subject import Subject
+from backend.schemas.subject import SubjectCreate, SubjectOut
 
 router = APIRouter(prefix="/subjects", tags=["subjects"])
 

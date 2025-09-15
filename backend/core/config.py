@@ -1,14 +1,17 @@
-from typing import List
+from typing import List, Optional
 from pydantic_settings import BaseSettings
 from pydantic import field_validator
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
 
 class Settings(BaseSettings):
     API_PREFIX: str = "/api"
     DEBUG: bool = False
-    DATABASE_URL: str = None
+    DATABASE_URL: str = "sqlite:///./flashcards.db"
     ALLOWED_ORIGINS: str = ""
-    OPENAI_API_KEY: str
+    OPENAI_API_KEY: Optional[str] = None
 
     def __init__(self, **values):
         super().__init__(**values)
@@ -18,9 +21,10 @@ class Settings(BaseSettings):
             db_host = os.getenv("DB_HOST")
             db_port = os.getenv("DB_PORT")
             db_name = os.getenv("DB_NAME")
-            self.DATABASE_URL = (
-                f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-            )
+            if all([db_user, db_password, db_host, db_port, db_name]):
+                self.DATABASE_URL = (
+                    f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+                )
 
     @field_validator("ALLOWED_ORIGINS")
     def parse_allowed_origins(cls, v: str) -> List[str]:
@@ -32,3 +36,4 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 settings = Settings()
+

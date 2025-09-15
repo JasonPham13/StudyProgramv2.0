@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from core.config import settings
-from routers import subject, deck, flashcards
-from db.database import create_tables
-
+from backend.core.config import settings
+from backend.routers import subject, deck, flashcards
+from backend.db.database import create_tables
 create_tables()
 
 app = FastAPI(
@@ -16,7 +15,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=["http://localhost:3000",
+                   "http://localhost:5173"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from db.database import get_db
-from models.subject import Subject
-from models.deck import Deck
-from schemas.deck import DeckCreate, DeckOut
+from backend.db.database import get_db
+from backend.models.subject import Subject
+from backend.models.deck import Deck
+from backend.schemas.deck import DeckCreate, DeckOut
 
 router = APIRouter(prefix="/subjects/{subject_id}/decks", tags=["decks"])
 

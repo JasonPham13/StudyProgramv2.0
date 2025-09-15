@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from db.database import Base
+from backend.db.database import Base
 
 class FlashcardJob(Base):
     __tablename__ = "flashcard_jobs"
