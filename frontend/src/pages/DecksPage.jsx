@@ -1,11 +1,11 @@
-// src/pages/DecksPage.jsx
-import { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { getDecks, createDeck, deleteDeck } from "../api/decks";
 
 export default function DecksPage() {
   const { subjectId } = useParams();
   const navigate = useNavigate();
+
   const [decks, setDecks] = useState([]);
   const [name, setName] = useState("");
 
@@ -14,15 +14,12 @@ export default function DecksPage() {
   }, [subjectId]);
 
   const fetchDecks = async () => {
-    try {
-      const res = await getDecks(subjectId);
-      setDecks(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+    const res = await getDecks(subjectId);
+    setDecks(res.data);
   };
 
-  const handleAdd = async () => {
+  const handleAdd = async (e) => {
+    e?.preventDefault?.();
     if (!name.trim()) return;
     await createDeck(subjectId, { name });
     setName("");
@@ -35,62 +32,84 @@ export default function DecksPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gray-100 py-12">
-      <button
-        className="self-start mb-6 text-blue-600 hover:underline"
-        onClick={() => navigate(-1)}
-      >
-        ← Back
-      </button>
+    <div className="flex justify-center">
+      <div className="w-full max-w-4xl">
+        <div className="flex items-center justify-between">
+          <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+          <span className="badge">Subject #{subjectId}</span>
+        </div>
 
-      <h1 className="text-3xl font-serif font-bold mb-6 text-gray-800 text-center">
-        Decks
-      </h1>
+        <p className="kicker mt-6 text-center">FLASHCARDS</p>
+        <h1 className="title text-4xl font-semibold tracking-tight mt-2 text-center">
+          Decks
+        </h1>
+        <p className="muted mt-3 text-center">
+          Add decks under this subject, then create flashcards and study.
+        </p>
 
-      <div className="flex mb-8 w-full max-w-md">
-        <input
-          className="border border-gray-300 rounded-l px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="New Deck Name"
-        />
-        <button
-          className="bg-green-600 text-white px-6 py-2 rounded-r hover:bg-green-700 transition"
-          onClick={handleAdd}
-        >
-          Add
-        </button>
-      </div>
+        <div className="card mt-8 p-6">
+          <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3">
+            <input
+              className="input flex-1"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="New deck name"
+            />
+            <button type="submit" className="btn btn-primary">
+              Add Deck
+            </button>
+          </form>
+        </div>
 
-      <ul className="w-full max-w-md">
-        {decks.map((d) => (
-          <li
-            key={d.id}
-            className="flex justify-between items-center bg-white p-4 mb-3 rounded shadow hover:shadow-md transition"
-          >
-            <Link
-              to={`/subjects/${subjectId}/decks/${d.id}/flashcards`}
-              className="text-blue-600 font-serif font-medium"
-            >
-              {d.name}
-            </Link>
-            <div className="flex gap-2">
-              <Link
-                to={`/quiz/${subjectId}/${d.id}`}
-                className="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 transition"
-              >
-                Quiz
-              </Link>
-              <button
-                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
-                onClick={() => handleDelete(d.id)}
-              >
-                Delete
-              </button>
+        <div className="mt-6 space-y-4">
+          {decks.length === 0 ? (
+            <div className="card p-10 text-center">
+              <div className="title text-xl font-semibold">No decks yet</div>
+              <p className="muted mt-2">Create one above to start.</p>
             </div>
-          </li>
-        ))}
-      </ul>
+          ) : (
+            decks.map((d) => (
+              <div key={d.id} className="card card-hover p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <div className="title text-xl font-semibold">{d.name}</div>
+                    <p className="muted mt-1">
+                      Manage flashcards and run quizzes for this deck.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() =>
+                        navigate(`/subjects/${subjectId}/decks/${d.id}/flashcards`)
+                      }
+                    >
+                      Flashcards
+                    </button>
+
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => navigate(`/quiz/${subjectId}/${d.id}`)}
+                    >
+                      Quiz
+                    </button>
+
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(d.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getSubjects, createSubject, deleteSubject } from "../api/subjects";
-import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 
 export default function SubjectsPage() {
+  const navigate = useNavigate();
   const [subjects, setSubjects] = useState([]);
   const [name, setName] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     fetchSubjects();
@@ -17,7 +16,8 @@ export default function SubjectsPage() {
     setSubjects(res.data);
   };
 
-  const handleAdd = async () => {
+  const handleAdd = async (e) => {
+    e?.preventDefault?.();
     if (!name.trim()) return;
     await createSubject({ name });
     setName("");
@@ -29,73 +29,70 @@ export default function SubjectsPage() {
     fetchSubjects();
   };
 
-  const prev = () => {
-    setCurrentIndex((i) => (i - 1 + subjects.length) % subjects.length);
-  };
-
-  const next = () => {
-    setCurrentIndex((i) => (i + 1) % subjects.length);
-  };
+  const hasSubjects = useMemo(() => subjects.length > 0, [subjects]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-b from-purple-200 to-indigo-400 font-serif">
-      <h1 className="text-4xl font-extrabold mt-8 text-white drop-shadow-lg">
-        Choose a Subject
-      </h1>
+    <div className="flex justify-center">
+      <div className="w-full max-w-4xl">
+        <p className="kicker">FLASHCARDS</p>
+        <h1 className="title text-4xl font-semibold tracking-tight mt-2 text-center">
+          Subjects
+        </h1>
+        <p className="muted mt-3 text-center">
+          Create a subject, then add decks and flashcards.
+        </p>
 
-      {/* Input box */}
-      <div className="flex mt-6">
-        <input
-          className="border border-gray-300 rounded-l px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="New Subject Name"
-        />
-        <button
-          className="bg-indigo-600 text-white px-6 py-2 rounded-r hover:bg-indigo-700 transition"
-          onClick={handleAdd}
-        >
-          Add
-        </button>
-      </div>
+        <div className="card mt-8 p-6">
+          <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3">
+            <input
+              className="input flex-1"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="New subject name"
+            />
+            <button type="submit" className="btn btn-primary">
+              Add Subject
+            </button>
+          </form>
+        </div>
 
-      {/* Centered Carousel */}
-      <div className="flex flex-1 items-center justify-center w-full">
-        <div className="flex items-center space-x-6">
-          <button
-            onClick={prev}
-            className="p-3 rounded-full bg-white shadow hover:bg-gray-100"
-          >
-            <ChevronLeft className="w-8 h-8 text-indigo-600" />
-          </button>
-
-          {subjects.length > 0 ? (
-            <div className="relative w-80 h-56 flex items-center justify-center">
-              <div className="bg-white rounded-2xl shadow-xl p-6 w-full h-full flex flex-col justify-between items-center transform scale-105">
-            <Link
-              to={`/subjects/${subjects[currentIndex].id}/decks`}
-              className="text-3xl font-serif text-center text-indigo-700 hover:text-indigo-900 transition"
-            >
-              {subjects[currentIndex].name}
-            </Link>
-                <button
-                  onClick={() => handleDelete(subjects[currentIndex].id)}
-                  className="flex items-center text-red-500 hover:text-red-700 transition"
-                >
-                  <Trash2 className="w-4 h-4 mr-1" /> Delete
-                </button>
-              </div>
+        <div className="mt-6 space-y-4">
+          {!hasSubjects ? (
+            <div className="card p-10 text-center">
+              <div className="title text-xl font-semibold">No subjects yet</div>
+              <p className="muted mt-2">
+                Add one above to start organizing your decks.
+              </p>
             </div>
           ) : (
-            <div className="text-gray-700">No subjects yet</div>
-          )}
+            subjects.map((s) => (
+              <div key={s.id} className="card card-hover p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <div className="title text-xl font-semibold">{s.name}</div>
+                    <p className="muted mt-1">
+                      Organize your decks under this subject.
+                    </p>
+                  </div>
 
-          <button
-            onClick={next}
-            className="p-3 rounded-full bg-white shadow hover:bg-gray-100"
-          >
-            <ChevronRight className="w-8 h-8 text-indigo-600" />
-          </button>
+                  <div className="flex gap-2">
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => navigate(`/subjects/${s.id}/decks`)}
+                    >
+                      Open
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(s.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -1,68 +1,208 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
+/* ===== Base ===== */
+html, body, #root { height: 100%; }
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  color: #e5e7eb; /* gray-200 */
+  background: #070b16; /* deep navy */
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    "Apple Color Emoji", "Segoe UI Emoji";
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* ===== App background  ===== */
+.app-bg {
+  min-height: 100%;
+  position: relative;
+  overflow-x: hidden;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.app-bg::before {
+  content: "";
+  position: absolute;
+  inset: -200px;
+  background:
+    radial-gradient(900px 600px at 20% 10%, rgba(56, 189, 248, 0.20), transparent 55%),
+    radial-gradient(800px 520px at 78% 18%, rgba(99, 102, 241, 0.22), transparent 60%),
+    radial-gradient(700px 520px at 55% 78%, rgba(244, 114, 182, 0.14), transparent 60%);
+  filter: blur(18px);
+  pointer-events: none;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.app-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,0.05), transparent 20%, rgba(255,255,255,0.03));
+  pointer-events: none;
+}
+
+.app-surface {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== Container ===== */
+.container-app {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 72rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+/* ===== Glass / Card ===== */
+.card {
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.55);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.card-hover {
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(148, 163, 184, 0.28);
+  box-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* ===== Typography helpers ===== */
+.muted { color: rgba(226, 232, 240, 0.72); }
+.title { color: #f8fafc; }
+.kicker {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: rgba(56, 189, 248, 0.85);
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  border-radius: 14px;
+  padding: .6rem 1rem;
+  font-size: .9rem;
+  font-weight: 650;
+  transition: transform 140ms ease, background-color 140ms ease, border-color 140ms ease, opacity 140ms ease;
+  user-select: none;
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  color: #08101f;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.95), rgba(99, 102, 241, 0.95));
+  box-shadow: 0 10px 24px rgba(56, 189, 248, 0.18);
+}
+.btn-primary:hover { opacity: 0.95; }
+
+.btn-ghost {
+  color: #e5e7eb;
+  background: rgba(2, 6, 23, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.20);
+}
+.btn-ghost:hover {
+  background: rgba(2, 6, 23, 0.55);
+  border-color: rgba(148, 163, 184, 0.30);
+}
+
+.btn-danger {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(244, 63, 94, 0.92));
+}
+
+/* ===== Inputs ===== */
+.input {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.20);
+  background: rgba(2, 6, 23, 0.35);
+  padding: .65rem 1rem;
+  font-size: .95rem;
+  color: #e5e7eb;
+  outline: none;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+.input::placeholder { color: rgba(148, 163, 184, 0.70); }
+
+.input:focus {
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.20);
+  background: rgba(2, 6, 23, 0.50);
+}
+
+/* ===== Links + badges ===== */
+.link {
+  color: rgba(56, 189, 248, 0.95);
+  text-decoration: none;
+  font-weight: 650;
+}
+.link:hover { text-decoration: underline; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(2, 6, 23, 0.40);
+  padding: .28rem .7rem;
+  font-size: .75rem;
+  font-weight: 650;
+  color: rgba(226, 232, 240, 0.80);
+}
+
+/* ===== Make ALL links non-purple and button-like in header ===== */
+a, a:visited { color: inherit; text-decoration: none; }
+
+/* Brand */
+.brand { display: flex; align-items: center; gap: 0.75rem; }
+.brand-dot {
+  height: 36px; width: 36px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(56,189,248,.95), rgba(99,102,241,.95));
+  box-shadow: 0 10px 26px rgba(56, 189, 248, 0.12);
+}
+.brand-title { color: rgba(248, 250, 252, 0.95); font-weight: 700; }
+.brand-sub { color: rgba(226, 232, 240, 0.55); font-size: 12px; }
+
+/* Nav buttons */
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .55rem .9rem;
+  border-radius: 14px;
+  font-size: .9rem;
+  font-weight: 650;
+  color: rgba(248, 250, 252, 0.85);
+  background: rgba(2, 6, 23, 0.32);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+}
+.nav-btn:hover {
+  background: rgba(2, 6, 23, 0.52);
+  border-color: rgba(148, 163, 184, 0.28);
+  color: rgba(248, 250, 252, 0.95);
+}
+.nav-btn:active { transform: translateY(1px); }
+.nav-btn--active {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.96);
 }

@@ -1,107 +1,191 @@
-// src/pages/FlashcardsPage.jsx
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { getFlashcards, createFlashcard, deleteFlashcard } from "../api/flashcards";
 
 export default function FlashcardsPage() {
   const { subjectId, deckId } = useParams();
   const navigate = useNavigate();
+
   const [flashcards, setFlashcards] = useState([]);
   const [question, setQuestion] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
+
+  const [index, setIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
 
   useEffect(() => {
     fetchFlashcards();
   }, [subjectId, deckId]);
 
+  useEffect(() => {
+    setShowAnswer(false);
+  }, [index]);
+
   const fetchFlashcards = async () => {
-    try {
-      const res = await getFlashcards(subjectId, deckId);
-      setFlashcards(res.data);
-    } catch (err) {
-      console.error("Failed to fetch flashcards", err);
-    }
+    const res = await getFlashcards(subjectId, deckId);
+    setFlashcards(res.data);
+    setIndex(0);
+    setShowAnswer(false);
   };
 
-  const handleAdd = async () => {
+  const total = flashcards.length;
+
+  const current = useMemo(() => {
+    if (!total) return null;
+    return flashcards[Math.min(index, total - 1)];
+  }, [flashcards, index, total]);
+
+  const handleAdd = async (e) => {
+    e?.preventDefault?.();
     if (!question.trim() || !correctAnswer.trim()) return;
-    try {
-      await createFlashcard(subjectId, deckId, {
-        question,
-        correct_answer: correctAnswer,
-      });
-      setQuestion("");
-      setCorrectAnswer("");
-      fetchFlashcards();
-    } catch (err) {
-      console.error("Create flashcard failed", err);
-    }
+
+    await createFlashcard(subjectId, deckId, {
+      question,
+      correct_answer: correctAnswer,
+    });
+
+    setQuestion("");
+    setCorrectAnswer("");
+    fetchFlashcards();
   };
-  
+
   const handleDelete = async (flashcardId) => {
-    try {
-      await deleteFlashcard(subjectId, deckId, flashcardId);
-      fetchFlashcards();
-    } catch (err) {
-      console.error("Delete failed", err);
-    }
+    await deleteFlashcard(subjectId, deckId, flashcardId);
+    fetchFlashcards();
   };
+
+  const prev = () => setIndex((i) => Math.max(0, i - 1));
+  const next = () => setIndex((i) => Math.min(total - 1, i + 1));
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gray-100 py-12">
-      <button
-        className="self-start mb-6 text-blue-600 hover:underline"
-        onClick={() => navigate(-1)}
-      >
-        ← Back
-      </button>
+    <div className="flex justify-center">
+      <div className="w-full max-w-5xl">
+        <div className="flex items-center justify-between">
+          <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+          <span className="badge">
+            Deck #{deckId} • {total} cards
+          </span>
+        </div>
 
-      <h1 className="text-3xl font-serif font-bold mb-6 text-gray-800 text-center">
-        Flashcards
-      </h1>
+        <p className="kicker mt-6 text-center">FLASHCARDS</p>
+        <h1 className="title text-4xl font-semibold tracking-tight mt-2 text-center">
+          Study
+        </h1>
+        <p className="muted mt-3 text-center">
+          Click the card to reveal the answer.
+        </p>
 
-      <div className="flex mb-8 w-full max-w-2xl gap-2">
-        <input
-          className="border border-gray-300 rounded px-4 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Question"
-        />
-        <input
-          className="border border-gray-300 rounded px-4 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={correctAnswer}
-          onChange={(e) => setCorrectAnswer(e.target.value)}
-          placeholder="Correct Answer"
-        />
-        <button
-          className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
-          onClick={handleAdd}
-        >
-          Add
-        </button>
-      </div>
+        {/* Add flashcard */}
+        <div className="card mt-8 p-6">
+          <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input
+              className="input"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Question"
+            />
+            <input
+              className="input"
+              value={correctAnswer}
+              onChange={(e) => setCorrectAnswer(e.target.value)}
+              placeholder="Correct answer"
+            />
+            <button type="submit" className="btn btn-primary">
+              Add Flashcard
+            </button>
+          </form>
+        </div>
 
-      <ul className="w-full max-w-2xl">
-        {flashcards.map((f) => (
-          <li
-            key={f.id}
-            className="mb-4 bg-white p-4 rounded shadow hover:shadow-md transition"
-          >
-            <div className="font-serif font-semibold text-lg">{f.question}</div>
-            <div className="text-sm text-gray-700 mt-1">
-              Answer: {f.correct_answer}
-            </div>
-            <div className="mt-3 flex gap-2">
-              <button
-                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
-                onClick={() => handleDelete(f.id)}
+        {/* Big centered square flashcard */}
+        <div className="mt-10 flex justify-center">
+          <div className="w-full flex justify-center">
+            {total === 0 ? (
+              <div className="card p-12 text-center w-full max-w-3xl">
+                <div className="title text-xl font-semibold">No flashcards yet</div>
+                <p className="muted mt-2">Add your first card above to start studying.</p>
+              </div>
+            ) : (
+              <div
+                className="card card-hover"
+                style={{
+                  width: "min(40vh, 500px)",
+                  height: "min(40vh, 500px)",
+                }}
               >
-                Delete
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAnswer((s) => !s)}
+                  className="w-full h-full rounded-[18px] p-10 text-center flex flex-col justify-center items-center"
+                  style={{ background: "transparent", border: "none", color: "inherit" }}
+                >
+                  <div className="flex items-center justify-between w-full mb-8">
+                    <span className="badge">{index + 1} / {total}</span>
+                    <span className="muted text-sm">
+                      {showAnswer ? "Showing answer" : "Showing question"}
+                    </span>
+                  </div>
+
+                  <div className="title 4xl md:text-5xl font-semibold tracking-tight">
+                    {showAnswer ? current.correct_answer : current.question}
+                  </div>
+
+                  <div className="muted mt-6">
+                    Click to {showAnswer ? "hide answer" : "reveal answer"}
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Controls */}
+        {total > 0 && (
+          <div className="mt-6 flex items-center justify-between">
+            <button className="btn btn-ghost" onClick={prev} disabled={index === 0}>
+              ← Prev
+            </button>
+
+            <span className="badge">Tap card to flip</span>
+
+            <button
+              className="btn btn-primary"
+              onClick={next}
+              disabled={index === total - 1}
+            >
+              Next →
+            </button>
+          </div>
+        )}
+
+        {/* Manage list */}
+        {total > 0 && (
+          <div className="card mt-10 p-6">
+            <div className="title text-lg font-semibold">Manage flashcards</div>
+            <p className="muted mt-1">
+              Delete anything incorrect.
+            </p>
+
+            <div className="mt-4 space-y-3">
+              {flashcards.map((f) => (
+                <div
+                  key={f.id}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border border-white/10 rounded-2xl bg-white/5 p-4"
+                >
+                  <div>
+                    <div className="title font-semibold">{f.question}</div>
+                    <div className="muted mt-1">Answer: {f.correct_answer}</div>
+                  </div>
+                  <button className="btn btn-danger" onClick={() => handleDelete(f.id)}>
+                    Delete
+                  </button>
+                </div>
+              ))}
             </div>
-          </li>
-        ))}
-      </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
